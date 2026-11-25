@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mini Campus Delivery Robot — AI Fundamentals Project</title>
+  <!-- Load Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Load Google Font: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            navy: {
+              DEFAULT: '#113f67',
+              dark: '#0b2a46',
+              light: '#1d5687',
+            },
+            teal: {
+              DEFAULT: '#117864',
+              dark: '#0c5748',
+              light: '#16a085',
+            }
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
+
+  <!-- Top Academic Header -->
+  <header class="bg-[#113f67] text-white shadow-md border-b border-slate-700">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <div>
+        <div class="flex items-center gap-2.5">
+          <span class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-[#117864] text-white font-bold shadow-sm">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <rect x="4" y="6" width="16" height="12" rx="3" />
+              <circle cx="9" cy="12" r="1.5" fill="currentColor" />
+              <circle cx="15" cy="12" r="1.5" fill="currentColor" />
+              <path d="M12 2v4M8 2h8" stroke-linecap="round" />
+            </svg>
+          </span>
+          <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight">
+            Mini Campus Delivery Robot
+          </h1>
+        </div>
+        <p class="text-slate-200 text-xs sm:text-sm mt-1">
+          Autonomous Navigation Under Uncertainty — Integrating <span class="font-semibold text-teal-200">A* Search</span>, <span class="font-semibold text-teal-200">Bayesian Inference</span> &amp; <span class="font-semibold text-teal-200">MDP Value Iteration</span>
+        </p>
+      </div>
+      <div class="bg-[#0b2a46]/80 border border-white/15 rounded-xl px-4 py-2 text-xs sm:text-sm">
+        <div class="font-semibold text-teal-300">AI Fundamentals Final Project</div>
+        <div class="text-slate-200">Ashanti Rakhimzhanova &amp; Bizhan Tleubergenov</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Integrated Pipeline Banner -->
+  <div class="bg-white border-b border-slate-200 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex flex-wrap items-center justify-center gap-2 text-xs sm:text-sm font-medium text-slate-600">
+      <span class="px-2.5 py-1 rounded-lg bg-slate-100 text-[#113f67] font-semibold">5×5 Campus Grid</span>
+      <span class="text-slate-400">→</span>
+      <span class="px-2.5 py-1 rounded-lg bg-teal-50 text-[#117864] border border-teal-200 font-semibold">1. A* Pathfinding</span>
+      <span class="text-slate-400">→</span>
+      <span class="px-2.5 py-1 rounded-lg bg-amber-50 text-amber-800 border border-amber-200 font-semibold">2. Bayesian Sensor Fusion</span>
+      <span class="text-slate-400">→</span>
+      <span class="px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-800 border border-indigo-200 font-semibold">3. MDP Action Policy</span>
+    </div>
+  </div>
+
+  <!-- Main Responsive Dashboard Grid -->
+  <main class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- LEFT COLUMN: Interactive Controls (4 cols on desktop) -->
+    <section class="lg:col-span-4 space-y-5">
+
+      <!-- Card 1: Map & Obstacle Controls -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-base font-bold text-[#113f67] flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-[#113f67] text-white text-xs flex items-center justify-center font-bold">1</span>
+            Campus Map &amp; A* Settings
+          </h2>
+        </div>
+
+        <label for="presetSelect" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+          Preset Campus Scenarios
+        </label>
+        <select id="presetSelect" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2.5 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#117864] transition">
+          <option value="default">Default Campus — Walls at (1,1), (2,2)</option>
+          <option value="crowded">Crowded Quad — Walls at (1,1), (1,2), (2,2), (3,1)</option>
+          <option value="blocked">Blocked Corridor — No Valid Path</option>
+          <option value="custom" disabled>Custom Map (Edited via Grid Click)</option>
+        </select>
+
+        <p class="text-xs text-slate-500 mt-2.5 leading-relaxed">
+          Tip: Click any open or wall cell on the 5×5 grid to toggle obstacles dynamically and watch A* recalculate the shortest path.
+        </p>
+      </div>
+
+      <!-- Card 2: Bayesian Sensor Controls -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+        <h2 class="text-base font-bold text-[#113f67] flex items-center gap-2 mb-3">
+          <span class="w-6 h-6 rounded-lg bg-[#117864] text-white text-xs flex items-center justify-center font-bold">2</span>
+          Bayesian Sensor Parameters
+        </h2>
+
+        <!-- Sensor Alert Toggle -->
+        <label class="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 transition mb-4">
+          <div>
+            <span class="block text-sm font-bold text-slate-800">Sensor Obstacle Alert</span>
+            <span class="block text-xs text-slate-500">Evidence on next A* corridor cell</span>
+          </div>
+          <input id="sensorAlertToggle" type="checkbox" checked class="w-5 h-5 accent-[#117864] rounded cursor-pointer" />
+        </label>
+
+        <!-- Prior Slider -->
+        <div class="mb-3.5">
+          <div class="flex justify-between text-xs font-semibold mb-1">
+            <span class="text-slate-600">Prior Obstacle Prob. P(O)</span>
+            <span id="priorVal" class="text-[#113f67] font-bold">0.30</span>
+          </div>
+          <input id="priorSlider" type="range" min="0.05" max="0.95" step="0.05" value="0.30" class="w-full accent-[#113f67] cursor-pointer" />
+        </div>
+
+        <!-- True Positive Slider -->
+        <div class="mb-3.5">
+          <div class="flex justify-between text-xs font-semibold mb-1">
+            <span class="text-slate-600">True Positive P(Alert | O)</span>
+            <span id="tpVal" class="text-[#117864] font-bold">0.90</span>
+          </div>
+          <input id="tpSlider" type="range" min="0.50" max="0.99" step="0.01" value="0.90" class="w-full accent-[#117864] cursor-pointer" />
+        </div>
+
+        <!-- False Positive Slider -->
+        <div>
+          <div class="flex justify-between text-xs font-semibold mb-1">
+            <span class="text-slate-600">False Positive P(Alert | ~O)</span>
+            <span id="fpVal" class="text-amber-700 font-bold">0.10</span>
+          </div>
+          <input id="fpSlider" type="range" min="0.01" max="0.50" step="0.01" value="0.10" class="w-full accent-amber-600 cursor-pointer" />
+        </div>
+      </div>
+
+      <!-- Card 3: MDP Discount Factor & Quick Test Presets -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+        <h2 class="text-base font-bold text-[#113f67] flex items-center gap-2 mb-3">
+          <span class="w-6 h-6 rounded-lg bg-[#113f67] text-white text-xs flex items-center justify-center font-bold">3</span>
+          MDP Policy Parameters
+        </h2>
+
+        <div class="mb-4">
+          <div class="flex justify-between text-xs font-semibold mb-1">
+            <span class="text-slate-600">Discount Factor (γ)</span>
+            <span id="gammaVal" class="text-[#113f67] font-bold">0.90</span>
+          </div>
+          <input id="gammaSlider" type="range" min="0.10" max="0.99" step="0.05" value="0.90" class="w-full accent-[#113f67] cursor-pointer" />
+        </div>
+
+        <div class="bg-slate-50 rounded-xl p-3 border border-slate-200 text-xs text-slate-600 space-y-1">
+          <div class="font-bold text-slate-700">Reward Matrix R(s, a):</div>
+          <div class="flex justify-between"><span>Move + Clear:</span><span class="font-semibold text-emerald-700">+10</span></div>
+          <div class="flex justify-between"><span>Move + Blocked:</span><span class="font-semibold text-rose-700">-15 (Collision)</span></div>
+          <div class="flex justify-between"><span>Wait + Clear:</span><span class="font-semibold text-amber-700">-2 (Delay)</span></div>
+          <div class="flex justify-between"><span>Wait + Blocked:</span><span class="font-semibold text-teal-700">+5 (Safe Pause)</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CENTER COLUMN: Interactive 5x5 Campus Grid & Simulation (4 cols on desktop) -->
+    <section class="lg:col-span-4 flex flex-col gap-5">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex-1 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-base font-bold text-[#113f67]">5×5 Campus Grid Visualization</h2>
+            <span id="stepBadge" class="px-2.5 py-1 rounded-full text-xs font-bold bg-teal-50 text-[#117864] border border-teal-200">
+              Path: 8 Steps
+            </span>
+          </div>
+
+          <!-- Legend -->
+          <div class="flex flex-wrap gap-2 text-[11px] font-medium text-slate-600 mb-3">
+            <span class="inline-flex items-center gap-1"><span class="w-3 h-3 rounded bg-[#113f67]"></span>Robot / Start</span>
+            <span class="inline-flex items-center gap-1"><span class="w-3 h-3 rounded bg-[#117864]"></span>Goal (4,4)</span>
+            <span class="inline-flex items-center gap-1"><span class="w-3 h-3 rounded bg-slate-800"></span>Wall</span>
+            <span class="inline-flex items-center gap-1"><span class="w-3 h-3 rounded bg-teal-100 border border-teal-400"></span>A* Path</span>
+          </div>
+
+          <!-- 5x5 Interactive Grid Container -->
+          <div class="aspect-square w-full max-w-[360px] mx-auto bg-slate-100 p-2 rounded-2xl border border-slate-300 shadow-inner">
+            <div id="campusGrid" class="grid grid-cols-5 grid-rows-5 gap-1.5 w-full h-full">
+              <!-- Cells generated dynamically by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Simulation Action Controls -->
+        <div class="mt-5 space-y-3">
+          <div id="simFeedback" class="rounded-xl p-3 text-xs font-medium bg-slate-50 border border-slate-200 text-slate-700">
+            Robot is at <span class="font-bold">(0, 0)</span>. Ready to evaluate next corridor step.
+          </div>
+
+          <div class="grid grid-cols-2 gap-2.5">
+            <button id="simulateStepBtn" type="button" class="w-full py-2.5 px-3 rounded-xl bg-[#117864] hover:bg-[#0c5748] active:scale-[0.99] text-white font-bold text-xs sm:text-sm shadow-sm transition cursor-pointer flex items-center justify-center gap-1.5">
+              <span>Simulate Next Step</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+              </svg>
+            </button>
+            <button id="resetRobotBtn" type="button" class="w-full py-2.5 px-3 rounded-xl bg-slate-200 hover:bg-slate-300 active:scale-[0.99] text-slate-800 font-bold text-xs sm:text-sm transition cursor-pointer">
+              Reset Robot to (0,0)
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT COLUMN: Algorithm Outputs & Live Calculations (4 cols on desktop) -->
+    <section class="lg:col-span-4 space-y-5">
+
+      <!-- Output 1: A* Route Details -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-sm font-bold uppercase tracking-wider text-[#113f67]">Stage 1: A* Search Output</h3>
+          <span class="text-xs font-semibold text-slate-400">f(n) = g(n) + h(n)</span>
+        </div>
+        <div id="astarStatusBox" class="p-3 rounded-xl bg-teal-50 border border-teal-200 text-xs text-teal-950 font-mono break-words leading-relaxed">
+          [(0,0), (0,1), (0,2), (0,3), (0,4), (1,4), (2,4), (3,4), (4,4)]
+        </div>
+      </div>
+
+      <!-- Output 2: Bayesian Inference Result -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-sm font-bold uppercase tracking-wider text-[#117864]">Stage 2: Bayesian Inference</h3>
+          <span class="text-xs font-semibold text-slate-400">P(Obstacle | Evidence)</span>
+        </div>
+
+        <div class="flex items-end justify-between mt-2">
+          <div>
+            <div id="posteriorDisplay" class="text-3xl font-extrabold text-[#113f67]">79.4%</div>
+            <div id="priorDeltaDisplay" class="text-xs font-semibold text-rose-600 mt-0.5">+49.4% vs Prior (30.0%)</div>
+          </div>
+          <div class="text-right text-xs text-slate-500">
+            <div>Clear Prob. P(~O | E)</div>
+            <div id="clearProbDisplay" class="font-bold text-slate-700 text-sm">20.6%</div>
+          </div>
+        </div>
+
+        <!-- Visual Probability Bar -->
+        <div class="w-full h-3 bg-slate-200 rounded-full overflow-hidden mt-3 flex">
+          <div id="blockedBar" class="bg-rose-500 h-full transition-all duration-300" style="width: 79.4%;"></div>
+          <div id="clearBar" class="bg-emerald-500 h-full transition-all duration-300" style="width: 20.6%;"></div>
+        </div>
+        <div class="flex justify-between text-[11px] font-medium text-slate-500 mt-1">
+          <span>Blocked Risk</span>
+          <span>Clear Path</span>
+        </div>
+      </div>
+
+      <!-- Output 3: MDP Decision Making -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-sm font-bold uppercase tracking-wider text-[#113f67]">Stage 3: MDP Action Selection</h3>
+          <span class="text-xs font-semibold text-slate-400">10-Iter Value Iteration</span>
+        </div>
+
+        <!-- Recommended Action Banner -->
+        <div id="mdpActionBanner" class="rounded-xl p-3.5 mb-4 border flex items-center justify-between bg-amber-50 border-amber-300 text-amber-950">
+          <div>
+            <div class="text-[11px] uppercase font-bold tracking-wider opacity-75">Recommended Policy Action</div>
+            <div id="mdpActionText" class="text-xl font-extrabold">WAIT (Safe Pause)</div>
+          </div>
+          <div id="mdpActionIcon" class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center font-extrabold text-lg shadow-xs">
+            !
+          </div>
+        </div>
+
+        <!-- Utility Comparison Grid -->
+        <div class="grid grid-cols-2 gap-2.5 text-xs">
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+            <div class="text-slate-500 font-medium">1-Step EU(Move)</div>
+            <div id="immMoveVal" class="text-base font-extrabold text-slate-800 mt-0.5">-9.85</div>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+            <div class="text-slate-500 font-medium">1-Step EU(Wait)</div>
+            <div id="immWaitVal" class="text-base font-extrabold text-slate-800 mt-0.5">+3.56</div>
+          </div>
+          <div class="p-3 rounded-xl bg-indigo-50/70 border border-indigo-200">
+            <div class="text-indigo-900 font-medium">Value Iter Q(Move)</div>
+            <div id="viMoveVal" class="text-base font-extrabold text-[#113f67] mt-0.5">+13.68</div>
+          </div>
+          <div class="p-3 rounded-xl bg-teal-50/70 border border-teal-200">
+            <div class="text-teal-900 font-medium">Value Iter Q(Wait)</div>
+            <div id="viWaitVal" class="text-base font-extrabold text-[#117864] mt-0.5">+27.09</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Defense Scenario Buttons -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
+        <div class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Quick Defense Test Cases</div>
+        <div class="grid grid-cols-3 gap-2">
+          <button type="button" onclick="applyTestScenario('alert')" class="py-2 px-2 rounded-xl bg-slate-100 hover:bg-[#113f67] hover:text-white text-slate-700 font-semibold text-xs transition cursor-pointer">
+            1. Sensor Alert
+          </button>
+          <button type="button" onclick="applyTestScenario('clear')" class="py-2 px-2 rounded-xl bg-slate-100 hover:bg-[#117864] hover:text-white text-slate-700 font-semibold text-xs transition cursor-pointer">
+            2. No Alert
+          </button>
+          <button type="button" onclick="applyTestScenario('noisy')" class="py-2 px-2 rounded-xl bg-slate-100 hover:bg-amber-600 hover:text-white text-slate-700 font-semibold text-xs transition cursor-pointer">
+            3. Noisy Sensor
+          </button>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 py-3 px-4 text-center text-xs text-slate-500">
+    AI Fundamentals Final Project • Interactive Prototype by <span class="font-semibold text-[#113f67]">Ashanti Rakhimzhanova</span> &amp; <span class="font-semibold text-[#117864]">Bizhan Tleubergenov</span>
+  </footer>
+
+  <!-- Core AI Algorithms & Interactive Dashboard Script -->
+  <script>
+    // ==========================================
+    // APPLICATION STATE
+    // ==========================================
+    const GRID_SIZE = 5;
+    const START_NODE = { x: 0, y: 0 };
+    const GOAL_NODE = { x: 4, y: 4 };
+
+    let state = {
+      robotPos: { x: 0, y: 0 },
+      walls: new Set(['1,1', '2,2']),
+      sensorAlert: true,
+      priorObstacle: 0.30,
+      truePositive: 0.90,
+      falsePositive: 0.10,
+      gamma: 0.90,
+      currentPath: [],
+      posteriorObstacle: 0.7941,
+      recommendedAction: 'Wait',
+      waitCount: 0
+    };
+
+    const keyOf = (x, y) => `${x},${y}`;
+
+    // ==========================================
+    // 1. SEARCH ALGORITHM: A* (A-STAR)
+    // ==========================================
+    function aStarSearch(gridSize, start, goal, wallsSet) {
+      const startKey = keyOf(start.x, start.y);
+      const goalKey = keyOf(goal.x, goal.y);
+
+      if (wallsSet.has(startKey) || wallsSet.has(goalKey)) {
+        return [];
+      }
+
+      // Priority queue array sorted by f(n) = g(n) + h(n)
+      const frontier = [{ x: start.x, y: start.y, priority: 0 }];
+      const cameFrom = new Map();
+      const costSoFar = new Map();
+
+      cameFrom.set(startKey, null);
+      costSoFar.set(startKey, 0);
+
+      const directions = [
+        { dx: 0, dy: 1 },
+        { dx: 1, dy: 0 },
+        { dx: 0, dy: -1 },
+        { dx: -1, dy: 0 }
+      ];
+
+      while (frontier.length > 0) {
+        frontier.sort((a, b) => a.priority - b.priority);
+        const current = frontier.shift();
+        const currKey = keyOf(current.x, current.y);
+
+        if (currKey === goalKey) {
+          break;
+        }
+
+        for (const dir of directions) {
+          const nx = current.x + dir.dx;
+          const ny = current.y + dir.dy;
+          const nextKey = keyOf(nx, ny);
+
+          if (nx >= 0 && nx < gridSize && ny >= 0 && ny < gridSize && !wallsSet.has(nextKey)) {
+            const newCost = costSoFar.get(currKey) + 1;
+            if (!costSoFar.has(nextKey) || newCost < costSoFar.get(nextKey)) {
+              costSoFar.set(nextKey, newCost);
+              // Manhattan Distance Heuristic h(n)
+              const heuristic = Math.abs(goal.x - nx) + Math.abs(goal.y - ny);
+              const priority = newCost + heuristic;
+              frontier.push({ x: nx, y: ny, priority });
+              cameFrom.set(nextKey, current);
+            }
+          }
+        }
+      }
+
+      if (!cameFrom.has(goalKey)) {
+        return [];
+      }
+
+      const path = [];
+      let curr = { x: goal.x, y: goal.y };
+      while (curr !== null) {
+        path.push(curr);
+        curr = cameFrom.get(keyOf(curr.x, curr.y));
+      }
+      path.reverse();
+      return path;
+    }
+
+    // ==========================================
+    // 2. PROBABILISTIC REASONING: BAYESIAN INFERENCE
+    // ==========================================
+    function bayesianUpdate(priorObstacle, truePositive, falsePositive, sensorAlert) {
+      if (sensorAlert) {
+        const pAlert = (truePositive * priorObstacle) + (falsePositive * (1.0 - priorObstacle));
+        return (truePositive * priorObstacle) / pAlert;
+      } else {
+        const falseNegative = 1.0 - truePositive;
+        const trueNegative = 1.0 - falsePositive;
+        const pNoAlert = (falseNegative * priorObstacle) + (trueNegative * (1.0 - priorObstacle));
+        return (falseNegative * priorObstacle) / pNoAlert;
+      }
+    }
+
+    // ==========================================
+    // 3. SEQUENTIAL DECISION MAKING: MDP (VALUE ITERATION)
+    // ==========================================
+    function mdpDecision(probBlocked, gamma = 0.90, iterations = 10) {
+      const probClear = 1.0 - probBlocked;
+
+      // Reward Matrix:
+      // Move: Clear = +10, Blocked = -15
+      // Wait: Clear = -2,  Blocked = +5
+      let vClear = 0.0;
+      let vBlocked = 0.0;
+
+      for (let i = 0; i < iterations; i++) {
+        const qMoveClear = probClear * (10 + gamma * vClear) + probBlocked * (-15 + gamma * vBlocked);
+        const qWaitClear = probClear * (-2 + gamma * vClear) + probBlocked * (5 + gamma * vBlocked);
+
+        const qMoveBlocked = probClear * (10 + gamma * vClear) + probBlocked * (-15 + gamma * vBlocked);
+        const qWaitBlocked = probClear * (-2 + gamma * vClear) + probBlocked * (5 + gamma * vBlocked);
+
+        vClear = Math.max(qMoveClear, qWaitClear);
+        vBlocked = Math.max(qMoveBlocked, qWaitBlocked);
+      }
+
+      const viMove = probClear * (10 + gamma * vClear) + probBlocked * (-15 + gamma * vBlocked);
+      const viWait = probClear * (-2 + gamma * vClear) + probBlocked * (5 + gamma * vBlocked);
+
+      // Immediate 1-step Expected Utility (from original Colab notebook)
+      const immMove = (probClear * 10) + (probBlocked * -15);
+      const immWait = (probClear * -2) + (probBlocked * 5);
+
+      const bestAction = viMove > viWait ? 'Move' : 'Wait';
+      return { bestAction, immMove, immWait, viMove, viWait };
+    }
+
+    // ==========================================
+    // UI RENDERING & PIPELINE SYNCHRONIZATION
+    // ==========================================
+    function updatePipeline() {
+      // 1. Run A* from current robot position to Goal (4,4)
+      state.currentPath = aStarSearch(GRID_SIZE, state.robotPos, GOAL_NODE, state.walls);
+
+      // 2. Run Bayesian Inference
+      state.posteriorObstacle = bayesianUpdate(
+        state.priorObstacle,
+        state.truePositive,
+        state.falsePositive,
+        state.sensorAlert
+      );
+
+      // 3. Run MDP Value Iteration
+      const mdpResult = mdpDecision(state.posteriorObstacle, state.gamma, 10);
+      state.recommendedAction = mdpResult.bestAction;
+
+      renderGrid();
+      renderMetrics(mdpResult);
+    }
+
+    function renderGrid() {
+      const gridEl = document.getElementById('campusGrid');
+      gridEl.innerHTML = '';
+
+      const pathSet = new Set(state.currentPath.map(p => keyOf(p.x, p.y)));
+      const nextStepKey = state.currentPath.length > 1
+        ? keyOf(state.currentPath[1].x, state.currentPath[1].y)
+        : null;
+
+      // Render rows from y = 4 (top) down to y = 0 (bottom) so (0,0) is bottom-left like standard Cartesian/Matplotlib grid
+      for (let y = GRID_SIZE - 1; y >= 0; y--) {
+        for (let x = 0; x < GRID_SIZE; x++) {
+          const cellKey = keyOf(x, y);
+          const isRobot = (x === state.robotPos.x && y === state.robotPos.y);
+          const isGoal = (x === GOAL_NODE.x && y === GOAL_NODE.y);
+          const isWall = state.walls.has(cellKey);
+          const isOnPath = pathSet.has(cellKey);
+          const isNextStep = (cellKey === nextStepKey);
+
+          const cell = document.createElement('button');
+          cell.type = 'button';
+          cell.title = `Cell (${x}, ${y}) — Click to toggle wall`;
+
+          let baseClasses = 'relative rounded-xl flex flex-col items-center justify-center text-xs font-bold transition-all duration-150 select-none cursor-pointer border ';
+
+          if (isRobot && isGoal) {
+            baseClasses += 'bg-[#117864] text-white border-emerald-300 shadow-md ring-2 ring-emerald-400';
+            cell.innerHTML = `<span class="text-sm">🤖🏁</span><span class="text-[10px]">DONE</span>`;
+          } else if (isRobot) {
+            baseClasses += 'bg-[#113f67] text-white border-blue-300 shadow-md scale-[1.02]';
+            cell.innerHTML = `<span class="text-base leading-none">🤖</span><span class="text-[10px] mt-0.5">(${x},${y})</span>`;
+          } else if (isGoal) {
+            baseClasses += 'bg-[#117864] text-white border-teal-300 shadow-sm';
+            cell.innerHTML = `<span class="text-xs">GOAL</span><span class="text-[10px] opacity-90">(${x},${y})</span>`;
+          } else if (isWall) {
+            baseClasses += 'bg-slate-800 text-slate-200 border-slate-900 hover:bg-slate-700';
+            cell.innerHTML = `<span class="text-[11px]">WALL</span><span class="text-[9px] text-slate-400">(${x},${y})</span>`;
+          } else if (isNextStep) {
+            const borderHighlight = state.recommendedAction === 'Wait'
+              ? 'bg-amber-100 text-amber-950 border-rose-500 border-2 border-dashed'
+              : 'bg-teal-100 text-teal-950 border-teal-600 border-2 border-dashed';
+            baseClasses += borderHighlight;
+            cell.innerHTML = `<span class="text-[10px] font-extrabold">${state.recommendedAction === 'Wait' ? '⚠️ NEXT' : 'NEXT'}</span><span class="text-[10px]">(${x},${y})</span>`;
+          } else if (isOnPath) {
+            baseClasses += 'bg-teal-50 text-[#117864] border-teal-300 hover:bg-teal-100';
+            cell.innerHTML = `<span class="w-2 h-2 rounded-full bg-[#117864] mb-0.5"></span><span class="text-[10px]">(${x},${y})</span>`;
+          } else {
+            baseClasses += 'bg-white text-slate-400 border-slate-200 hover:bg-slate-50 hover:border-slate-300';
+            cell.innerHTML = `<span class="text-[10px]">(${x},${y})</span>`;
+          }
+
+          cell.className = baseClasses;
+          cell.addEventListener('click', () => toggleWall(x, y));
+          gridEl.appendChild(cell);
+        }
+      }
+    }
+
+    function renderMetrics(mdpResult) {
+      // Update slider readouts
+      document.getElementById('priorVal').textContent = state.priorObstacle.toFixed(2);
+      document.getElementById('tpVal').textContent = state.truePositive.toFixed(2);
+      document.getElementById('fpVal').textContent = state.falsePositive.toFixed(2);
+      document.getElementById('gammaVal').textContent = state.gamma.toFixed(2);
+
+      // Update A* output box & badge
+      const stepBadge = document.getElementById('stepBadge');
+      const astarBox = document.getElementById('astarStatusBox');
+      if (state.currentPath.length > 0) {
+        const steps = state.currentPath.length - 1;
+        stepBadge.textContent = steps === 0 ? 'Arrived at Goal!' : `Path: ${steps} Step${steps === 1 ? '' : 's'}`;
+        stepBadge.className = 'px-2.5 py-1 rounded-full text-xs font-bold bg-teal-50 text-[#117864] border border-teal-200';
+        astarBox.className = 'p-3 rounded-xl bg-teal-50 border border-teal-200 text-xs text-teal-950 font-mono break-words leading-relaxed';
+        astarBox.textContent = state.currentPath.map(p => `(${p.x},${p.y})`).join(' → ');
+      } else {
+        stepBadge.textContent = 'No Valid Path';
+        stepBadge.className = 'px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200';
+        astarBox.className = 'p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-900 font-semibold leading-relaxed';
+        astarBox.textContent = 'Goal (4,4) is unreachable! Remove a wall cell on the grid to restore an A* route.';
+      }
+
+      // Update Bayesian outputs
+      const postPct = (state.posteriorObstacle * 100).toFixed(1);
+      const clearPct = ((1 - state.posteriorObstacle) * 100).toFixed(1);
+      const deltaPct = ((state.posteriorObstacle - state.priorObstacle) * 100).toFixed(1);
+      const deltaSign = parseFloat(deltaPct) >= 0 ? '+' : '';
+
+      document.getElementById('posteriorDisplay').textContent = `${postPct}%`;
+      document.getElementById('clearProbDisplay').textContent = `${clearPct}%`;
+      const deltaEl = document.getElementById('priorDeltaDisplay');
+      deltaEl.textContent = `${deltaSign}${deltaPct}% vs Prior (${(state.priorObstacle * 100).toFixed(0)}%)`;
+      deltaEl.className = `text-xs font-semibold mt-0.5 ${parseFloat(deltaPct) > 0 ? 'text-rose-600' : 'text-emerald-600'}`;
+
+      document.getElementById('blockedBar').style.width = `${postPct}%`;
+      document.getElementById('clearBar').style.width = `${clearPct}%`;
+
+      // Update MDP outputs
+      const formatSigned = (val) => `${val >= 0 ? '+' : ''}${val.toFixed(2)}`;
+      document.getElementById('immMoveVal').textContent = formatSigned(mdpResult.immMove);
+      document.getElementById('immWaitVal').textContent = formatSigned(mdpResult.immWait);
+      document.getElementById('viMoveVal').textContent = formatSigned(mdpResult.viMove);
+      document.getElementById('viWaitVal').textContent = formatSigned(mdpResult.viWait);
+
+      const banner = document.getElementById('mdpActionBanner');
+      const actionText = document.getElementById('mdpActionText');
+      const actionIcon = document.getElementById('mdpActionIcon');
+
+      if (mdpResult.bestAction === 'Wait') {
+        banner.className = 'rounded-xl p-3.5 mb-4 border flex items-center justify-between bg-amber-50 border-amber-300 text-amber-950 transition-colors';
+        actionText.textContent = 'WAIT (Safe Pause)';
+        actionIcon.className = 'w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center font-extrabold text-lg shadow-xs';
+        actionIcon.textContent = '⏸';
+      } else {
+        banner.className = 'rounded-xl p-3.5 mb-4 border flex items-center justify-between bg-emerald-50 border-emerald-300 text-emerald-950 transition-colors';
+        actionText.textContent = 'MOVE (Proceed)';
+        actionIcon.className = 'w-10 h-10 rounded-xl bg-[#117864] text-white flex items-center justify-center font-extrabold text-lg shadow-xs';
+        actionIcon.textContent = '▶';
+      }
+    }
+
+    // ==========================================
+    // INTERACTIVE HANDLERS
+    // ==========================================
+    function toggleWall(x, y) {
+      const k = keyOf(x, y);
+      if ((x === state.robotPos.x && y === state.robotPos.y) || (x === GOAL_NODE.x && y === GOAL_NODE.y)) {
+        return;
+      }
+      if (state.walls.has(k)) {
+        state.walls.delete(k);
+      } else {
+        state.walls.add(k);
+      }
+      document.getElementById('presetSelect').value = 'custom';
+      updatePipeline();
+    }
+
+    document.getElementById('presetSelect').addEventListener('change', (e) => {
+      const val = e.target.value;
+      state.robotPos = { ...START_NODE };
+      state.waitCount = 0;
+      if (val === 'default') {
+        state.walls = new Set(['1,1', '2,2']);
+      } else if (val === 'crowded') {
+        state.walls = new Set(['1,1', '1,2', '2,2', '3,1']);
+      } else if (val === 'blocked') {
+        state.walls = new Set(['0,1', '1,0', '1,1']);
+      }
+      document.getElementById('simFeedback').innerHTML = `Map preset loaded. Robot reset to <span class="font-bold">(0, 0)</span>.`;
+      updatePipeline();
+    });
+
+    document.getElementById('sensorAlertToggle').addEventListener('change', (e) => {
+      state.sensorAlert = e.target.checked;
+      updatePipeline();
+    });
+
+    document.getElementById('priorSlider').addEventListener('input', (e) => {
+      state.priorObstacle = parseFloat(e.target.value);
+      updatePipeline();
+    });
+
+    document.getElementById('tpSlider').addEventListener('input', (e) => {
+      state.truePositive = parseFloat(e.target.value);
+      updatePipeline();
+    });
+
+    document.getElementById('fpSlider').addEventListener('input', (e) => {
+      state.falsePositive = parseFloat(e.target.value);
+      updatePipeline();
+    });
+
+    document.getElementById('gammaSlider').addEventListener('input', (e) => {
+      state.gamma = parseFloat(e.target.value);
+      updatePipeline();
+    });
+
+    // Simulate Next Step Button
+    document.getElementById('simulateStepBtn').addEventListener('click', () => {
+      const feedbackEl = document.getElementById('simFeedback');
+
+      if (state.robotPos.x === GOAL_NODE.x && state.robotPos.y === GOAL_NODE.y) {
+        feedbackEl.className = 'rounded-xl p-3 text-xs font-medium bg-emerald-50 border border-emerald-300 text-emerald-900';
+        feedbackEl.innerHTML = `🎉 <strong>Delivery Complete!</strong> Robot has safely reached Goal <span class="font-bold">(4, 4)</span>.`;
+        return;
+      }
+
+      if (state.currentPath.length <= 1) {
+        feedbackEl.className = 'rounded-xl p-3 text-xs font-medium bg-rose-50 border border-rose-300 text-rose-900';
+        feedbackEl.innerHTML = `⛔ <strong>Cannot Move:</strong> No valid A* path exists to Goal <span class="font-bold">(4, 4)</span>.`;
+        return;
+      }
+
+      const nextNode = state.currentPath[1];
+
+      if (state.recommendedAction === 'Wait') {
+        state.waitCount += 1;
+        feedbackEl.className = 'rounded-xl p-3 text-xs font-medium bg-amber-50 border border-amber-300 text-amber-950';
+        feedbackEl.innerHTML = `⏸ <strong>MDP Chose WAIT (Count: ${state.waitCount}):</strong> High obstacle probability (${(state.posteriorObstacle * 100).toFixed(1)}%) at <span class="font-bold">(${nextNode.x}, ${nextNode.y})</span>. Uncheck Sensor Alert when path clears to proceed.`;
+      } else {
+        state.robotPos = { x: nextNode.x, y: nextNode.y };
+        state.waitCount = 0;
+        updatePipeline();
+        if (state.robotPos.x === GOAL_NODE.x && state.robotPos.y === GOAL_NODE.y) {
+          feedbackEl.className = 'rounded-xl p-3 text-xs font-medium bg-emerald-50 border border-emerald-300 text-emerald-900';
+          feedbackEl.innerHTML = `🎉 <strong>Goal Reached!</strong> Robot safely delivered package to <span class="font-bold">(4, 4)</span>.`;
+        } else {
+          feedbackEl.className = 'rounded-xl p-3 text-xs font-medium bg-teal-50 border border-teal-300 text-teal-950';
+          feedbackEl.innerHTML = `▶ <strong>MDP Chose MOVE:</strong> Robot advanced safely to <span class="font-bold">(${state.robotPos.x}, ${state.robotPos.y})</span>.`;
+        }
+      }
+    });
+
+    // Reset Robot Button
+    document.getElementById('resetRobotBtn').addEventListener('click', () => {
+      state.robotPos = { ...START_NODE };
+      state.waitCount = 0;
+      const feedbackEl = document.getElementById('simFeedback');
+      feedbackEl.className = 'rounded-xl p-3 text-xs font-medium bg-slate-50 border border-slate-200 text-slate-700';
+      feedbackEl.innerHTML = `Robot reset to Start <span class="font-bold">(0, 0)</span>.`;
+      updatePipeline();
+    });
+
+    // Quick Defense Test Scenarios
+    window.applyTestScenario = function(type) {
+      if (type === 'alert') {
+        state.sensorAlert = true;
+        state.priorObstacle = 0.30;
+        state.truePositive = 0.90;
+        state.falsePositive = 0.10;
+      } else if (type === 'clear') {
+        state.sensorAlert = false;
+        state.priorObstacle = 0.30;
+        state.truePositive = 0.90;
+        state.falsePositive = 0.10;
+      } else if (type === 'noisy') {
+        state.sensorAlert = true;
+        state.priorObstacle = 0.30;
+        state.truePositive = 0.70;
+        state.falsePositive = 0.40;
+      }
+
+      document.getElementById('sensorAlertToggle').checked = state.sensorAlert;
+      document.getElementById('priorSlider').value = state.priorObstacle;
+      document.getElementById('tpSlider').value = state.truePositive;
+      document.getElementById('fpSlider').value = state.falsePositive;
+      updatePipeline();
+    };
+
+    // Initialize dashboard on load
+    window.addEventListener('DOMContentLoaded', updatePipeline);
+  </script>
+</body>
+</html>
